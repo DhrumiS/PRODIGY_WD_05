@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Weather App</title>
+    <link
+      href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css"
+    />
+    <style>
+      body {
+        background-color: #23272b;
+        font-family: "Arial", sans-serif;
+        color: #fff;
+        height: 100vh;
+        margin: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .weather-container {
+        background-color: rgba(0, 0, 0, 0.5);
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
+        text-align: center;
+      }
+
+      h1 {
+        margin-bottom: 20px;
+        font-weight: bold;
+      }
+
+      .form-control {
+        background-color: rgba(255, 255, 255, 0.5);
+        color: #000;
+      }
+
+      .btn-primary {
+        background-color: #007bff;
+        border-color: #007bff;
+      }
+
+      .btn-primary:hover {
+        background-color: #0056b3;
+        border-color: #004085;
+      }
+
+      #weatherIcon {
+        font-size: 4rem;
+        margin-bottom: 10px;
+      }
+
+      #currentDate {
+        margin-top: 10px;
+        font-size: 1.2rem;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="weather-container">
+      <h1>Weather App</h1>
+      <p id="currentDate"></p>
+      <form id="locationForm">
+        <div class="form-group">
+          <input
+            type="text"
+            class="form-control"
+            id="locationInput"
+            placeholder="Enter location"
+          />
+        </div>
+        <button type="submit" class="btn btn-primary btn-block">
+          Get Weather
+        </button>
+      </form>
+      <div class="mt-4" id="weatherDetails" style="display: none">
+        <i id="weatherIcon" class="fas fa-sun"></i>
+        <h2 id="weatherLocation"></h2>
+        <p id="weatherDescription"></p>
+        <h3 id="weatherTemperature"></h3>
+        <p id="weatherMaxMinTemp"></p>
+        <p id="weatherHumidity"></p>
+      </div>
+    </div>
+    <script>
+      document
+        .getElementById("locationForm")
+        .addEventListener("submit", function (e) {
+          e.preventDefault();
+          let location = document.getElementById("locationInput").value;
+          fetchWeatherData(location);
+        });
+
+      function fetchWeatherData(location) {
+        const apiKey = "11f96f299e14f07b00a037521241549e"; // Replace with your weather API key
+        const url = `https://api.openweathermap.org/data/2.5/weather?q=${location}&appid=${apiKey}&units=metric`;
+
+        fetch(url)
+          .then((response) => response.json())
+          .then((data) => {
+            console.log(data); // Log the response for debugging
+            if (data.cod === 200) {
+              displayWeatherData(data);
+            } else {
+              alert("Location not found");
+            }
+          })
+          .catch((error) => {
+            console.error("Error fetching the weather data:", error);
+          });
+      }
+
+      function displayWeatherData(data) {
+        document.getElementById("weatherDetails").style.display = "block";
+        document.getElementById(
+          "weatherLocation"
+        ).textContent = `${data.name}, ${data.sys.country}`;
+        document.getElementById("weatherDescription").textContent =
+          data.weather[0].description;
+        document.getElementById(
+          "weatherTemperature"
+        ).textContent = `${data.main.temp} °C`;
+        document.getElementById(
+          "weatherMaxMinTemp"
+        ).textContent = `Max Temp: ${data.main.temp_max} °C, Min Temp: ${data.main.temp_min} °C`;
+        document.getElementById(
+          "weatherHumidity"
+        ).textContent = `Humidity: ${data.main.humidity}%`;
+
+        // Set weather icon based on weather condition
+        const weatherIcon = document.getElementById("weatherIcon");
+        const weatherCode = data.weather[0].id;
+        if (weatherCode >= 200 && weatherCode < 300) {
+          weatherIcon.className = "fas fa-bolt";
+        } else if (weatherCode >= 300 && weatherCode < 600) {
+          weatherIcon.className = "fas fa-cloud-showers-heavy";
+        } else if (weatherCode >= 600 && weatherCode < 700) {
+          weatherIcon.className = "fas fa-snowflake";
+        } else if (weatherCode >= 700 && weatherCode < 800) {
+          weatherIcon.className = "fas fa-smog";
+        } else if (weatherCode === 800) {
+          weatherIcon.className = "fas fa-sun";
+        } else if (weatherCode > 800 && weatherCode < 900) {
+          weatherIcon.className = "fas fa-cloud";
+        } else {
+          weatherIcon.className = "fas fa-question";
+        }
+
+        // Display current date
+        const currentDate = new Date();
+        const options = {
+          weekday: "long",
+          year: "numeric",
+          month: "long",
+          day: "numeric",
+        };
+        document.getElementById("currentDate").textContent =
+          currentDate.toLocaleDateString("en-US", options);
+      }
+    </script>
+  </body>
+</html>
